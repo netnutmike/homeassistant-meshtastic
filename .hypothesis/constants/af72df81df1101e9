@@ -1,0 +1,4 @@
+# file: /Users/mikemyers/Documents/Development/homeassistant-meshtastic/home-assistant/custom_components/meshtastic/aiomeshtastic/protobuf/module_config_pb2.py
+# hypothesis_version: 6.151.10
+
+[1290, 1617, 1619, 1697, 1700, 1853, 1855, 1945, 1948, 2242, 2378, 2381, 2593, 2760, 2762, 2880, 2883, 3188, 3454, 3456, 3551, 3554, 3915, 3918, 4069, 4071, 4135, 4138, 4595, 4598, 5166, 5265, 5267, 5368, 5387, 5389, 5512, 5514, 5587, 'DESCRIPTOR', '_MODULECONFIG', '_REMOTEHARDWAREPIN']

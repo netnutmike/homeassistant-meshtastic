@@ -1,0 +1,4 @@
+# file: /Users/mikemyers/Documents/Development/homeassistant-meshtastic/home-assistant/custom_components/meshtastic/aiomeshtastic/protobuf/device_ui_pb2.py
+# hypothesis_version: 6.151.10
+
+[592, 595, 762, 764, 890, 892, 929, 932, 1199, 'DESCRIPTOR', '_DEVICEUICONFIG', '_LANGUAGE', '_NODEFILTER', '_NODEHIGHLIGHT', '_THEME']

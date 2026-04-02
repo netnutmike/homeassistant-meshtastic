@@ -1,0 +1,24 @@
+# Testing
+pytest>=8.0
+pytest-cov>=5.0
+pytest-asyncio>=0.23
+hypothesis>=6.100
+coverage>=7.5
+
+# Linting & Formatting
+ruff>=0.5
+
+# Type Checking
+mypy>=1.10
+
+# Security
+pip-audit>=2.7
+
+# API Docs Validation
+openapi-spec-validator>=0.7
+
+# Runtime Dependencies (for testing and type checking)
+aiomqtt>=2.0
+cryptography>=42.0
+protobuf>=5.26
+homeassistant>=2024.1

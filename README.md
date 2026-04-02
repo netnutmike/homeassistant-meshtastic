@@ -119,35 +119,39 @@ make test-watch
 
 ```
 homeassistant-meshtastic/
-├── custom_components/meshtastic/     # The HA integration
-│   ├── aiomeshtastic/                # Async Meshtastic library
-│   │   ├── connection/               # Connection implementations
-│   │   │   ├── mqtt.py               # MQTT connection (new)
-│   │   │   ├── decoder.py            # MQTT message decoder (new)
-│   │   │   ├── tcp.py                # TCP connection
-│   │   │   ├── bluetooth.py          # Bluetooth connection
-│   │   │   ├── serial.py             # Serial connection
-│   │   │   └── streaming.py          # Base streaming transport
-│   │   ├── protobuf/                 # Meshtastic protobuf definitions
-│   │   └── interface.py              # Mesh network interface
-│   ├── api.py                        # HA API client
-│   ├── config_flow.py                # Setup wizard
-│   ├── coordinator.py                # Data update coordinator
-│   ├── sensor.py                     # Sensor entities
-│   ├── const.py                      # Constants
-│   └── ...
-├── tests/                            # Test suite
-├── docs/                             # Documentation
-│   ├── api/                          # OpenAPI spec + Swagger UI
+├── home-assistant/
+│   └── custom_components/meshtastic/  # The HA integration
+│       ├── aiomeshtastic/             # Async Meshtastic library
+│       │   ├── connection/            # Connection implementations
+│       │   │   ├── mqtt.py            # MQTT connection (new)
+│       │   │   ├── decoder.py         # MQTT message decoder (new)
+│       │   │   ├── tcp.py             # TCP connection
+│       │   │   ├── bluetooth.py       # Bluetooth connection
+│       │   │   ├── serial.py          # Serial connection
+│       │   │   └── streaming.py       # Base streaming transport
+│       │   ├── protobuf/              # Meshtastic protobuf definitions
+│       │   └── interface.py           # Mesh network interface
+│       ├── api.py                     # HA API client
+│       ├── config_flow.py             # Setup wizard
+│       ├── coordinator.py             # Data update coordinator
+│       ├── sensor.py                  # Sensor entities
+│       ├── const.py                   # Constants
+│       └── ...
+├── tests/                             # Test suite
+├── docs/                              # Documentation
+│   ├── api/                           # OpenAPI spec + Swagger UI
 │   ├── user-guide.md
 │   ├── developer-guide.md
 │   └── features.md
-├── Makefile                          # Dev automation
-├── requirements-dev.txt              # Dev dependencies
-├── CONTRIBUTING.md                   # Contribution guidelines
-├── CHANGELOG.md                      # Version history
-├── LICENSE                           # MIT License
-└── README.md                         # This file
+├── .github/                           # CI workflows, issue/PR templates
+├── .vscode/launch.json                # VS Code debug configurations
+├── Makefile                           # Dev automation
+├── requirements-dev.txt               # Dev dependencies
+├── renovate.json                      # Automated dependency updates
+├── CONTRIBUTING.md                    # Contribution guidelines
+├── CHANGELOG.md                       # Version history
+├── LICENSE                            # MIT License
+└── README.md                          # This file
 ```
 
 ## Documentation

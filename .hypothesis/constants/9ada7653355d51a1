@@ -1,0 +1,4 @@
+# file: /Users/mikemyers/Documents/Development/homeassistant-meshtastic/home-assistant/custom_components/meshtastic/aiomeshtastic/connection/mqtt.py
+# hypothesis_version: 6.151.10
+
+[1883, 5067009, 4294967295, 'Error unsubscribing', 'LongFast', 'MQTT', 'US', 'big', 'from', 'msh/US/2/e/#', 'packet', 'utf-8']

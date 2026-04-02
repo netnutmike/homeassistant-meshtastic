@@ -1,0 +1,223 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ruff
+        run: pip install ruff>=0.5
+
+      - name: Lint (ruff check)
+        run: ruff check .
+
+      - name: Format check (ruff format)
+        run: ruff format --check .
+
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Type check (mypy)
+        run: mypy home-assistant/custom_components/meshtastic --ignore-missing-imports
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Security scan (pip-audit)
+        run: pip-audit
+
+  validate-openapi:
+    name: Validate OpenAPI Spec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install validator
+        run: pip install openapi-spec-validator>=0.7
+
+      - name: Validate OpenAPI specification
+        run: openapi-spec-validator docs/api/openapi.yaml
+
+  test:
+    name: Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run tests with coverage
+        run: |
+          pytest tests/ \
+            --cov=home-assistant/custom_components/meshtastic \
+            --cov-report=xml:coverage.xml \
+            --cov-report=term-missing \
+            --cov-fail-under=80 \
+            --junitxml=test-results.xml \
+            -v
+        env:
+          HYPOTHESIS_PROFILE: ci
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-py${{ matrix.python-version }}
+          path: |
+            coverage.xml
+            test-results.xml
+
+  pr-comment:
+    name: PR Comment
+    if: github.event_name == 'pull_request' && always()
+    needs: [lint, type-check, security, validate-openapi, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-py3.12
+          path: artifacts/
+        continue-on-error: true
+
+      - name: Comment PR with results
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let body = '## 🧪 CI Results\n\n';
+
+            const jobs = {
+              lint: '${{ needs.lint.result }}',
+              'type-check': '${{ needs.type-check.result }}',
+              security: '${{ needs.security.result }}',
+              'validate-openapi': '${{ needs.validate-openapi.result }}',
+              test: '${{ needs.test.result }}'
+            };
+
+            body += '| Check | Status |\n|-------|--------|\n';
+            for (const [name, status] of Object.entries(jobs)) {
+              const icon = status === 'success' ? '✅' : status === 'failure' ? '❌' : '⚠️';
+              body += `| ${name} | ${icon} ${status} |\n`;
+            }
+            body += '\n';
+
+            // Read coverage if available
+            try {
+              const coverage = fs.readFileSync('artifacts/coverage.xml', 'utf8');
+              const match = coverage.match(/line-rate="([^"]+)"/);
+              if (match) {
+                const pct = (parseFloat(match[1]) * 100).toFixed(1);
+                const icon = parseFloat(pct) >= 80 ? '✅' : '❌';
+                body += `**Coverage**: ${icon} ${pct}% (threshold: 80%)\n\n`;
+              }
+            } catch (e) {
+              body += '**Coverage**: ⚠️ Not available\n\n';
+            }
+
+            // Read test results if available
+            try {
+              const results = fs.readFileSync('artifacts/test-results.xml', 'utf8');
+              const tests = results.match(/tests="(\d+)"/);
+              const failures = results.match(/failures="(\d+)"/);
+              const errors = results.match(/errors="(\d+)"/);
+              if (tests) {
+                const total = tests[1];
+                const fail = failures ? failures[1] : '0';
+                const err = errors ? errors[1] : '0';
+                const passed = total - fail - err;
+                body += `**Tests**: ${passed} passed, ${fail} failed, ${err} errors (${total} total)\n`;
+              }
+            } catch (e) {
+              body += '**Tests**: ⚠️ Results not available\n';
+            }
+
+            // Find existing comment to update instead of creating duplicates
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('🧪 CI Results')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                comment_id: botComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body
+              });
+            }

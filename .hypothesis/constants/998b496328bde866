@@ -1,0 +1,4 @@
+# file: /Users/mikemyers/Documents/Development/homeassistant-meshtastic/home-assistant/custom_components/meshtastic/aiomeshtastic/connection/decoder.py
+# hypothesis_version: 6.151.10
+
+[b'\x00', '/', '/json/', 'Invalid JSON payload', 'c', 'channel', 'e', 'encrypted', 'from', 'id', 'json', 'little', 'packet', 'payload', 'to', 'type', 'unknown', 'utf-8']

@@ -1,0 +1,19 @@
+{
+  "extends": ["config:base"],
+  "baseBranches": ["dev"],
+  "labels": ["dependencies"],
+  "pip_requirements": {
+    "fileMatch": ["requirements.*\\.txt$"]
+  },
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": false
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "labels": ["dependencies", "breaking"]
+    }
+  ],
+  "schedule": ["before 6am on monday"]
+}

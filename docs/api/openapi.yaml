@@ -1,0 +1,841 @@
+openapi: "3.1.0"
+info:
+  title: Meshtastic Home Assistant Integration API
+  description: |
+    API documentation for the Meshtastic Home Assistant custom integration.
+    This integration supports MQTT, TCP, Bluetooth, and Serial connections to
+    Meshtastic mesh networks. Services are invoked via the Home Assistant
+    service call mechanism (`homeassistant.services.call`).
+
+    ## Authentication
+    All service calls require a valid Home Assistant long-lived access token
+    or authenticated session. Requests are made through the HA REST API at
+    `/api/services/meshtastic/<service_name>`.
+
+    ## MQTT Message Flow
+    MQTT messages follow the Meshtastic protobuf protocol:
+    `ServiceEnvelope` → `MeshPacket` → (optional AES-CTR decrypt) → `Data` payload.
+
+    ## Export Formats
+    This specification is available in both YAML (`openapi.yaml`) and can be
+    converted to JSON using standard tools (`yq`, `swagger-cli`, or any
+    YAML-to-JSON converter).
+  version: 1.0.0
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  contact:
+    name: Meshtastic HA Integration
+    url: https://github.com/broglep/homeassistant-meshtastic
+
+servers:
+  - url: http://homeassistant.local:8123/api
+    description: Home Assistant local instance
+  - url: "{protocol}://{host}:{port}/api"
+    description: Custom Home Assistant instance
+    variables:
+      protocol:
+        default: http
+        enum: [http, https]
+      host:
+        default: homeassistant.local
+      port:
+        default: "8123"
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Messaging
+    description: Send text messages to the mesh network
+  - name: Requests
+    description: Request data from specific mesh nodes (not available in MQTT-only mode)
+  - name: Events
+    description: Home Assistant events fired by the integration
+  - name: Configuration
+    description: MQTT connection and channel configuration
+  - name: MQTT Schemas
+    description: Meshtastic MQTT protobuf message schemas
+
+paths:
+  /services/meshtastic/send_text:
+    post:
+      operationId: sendText
+      summary: Send a text message
+      description: |
+        Send a text message to the mesh network. Supports both device-based
+        and MQTT connections. In MQTT mode, constructs a ServiceEnvelope and
+        publishes to the broker.
+      tags: [Messaging]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendTextRequest"
+            example:
+              from: "device_id_gateway"
+              text: "Hello from Home Assistant"
+              to: "device_id_target_node"
+              channel: "entity_id_channel"
+              ack: true
+      responses:
+        "200":
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /services/meshtastic/send_direct_message:
+    post:
+      operationId: sendDirectMessage
+      summary: Send a direct message to a specific node
+      description: |
+        Send a direct message to a specific Meshtastic node. The message is
+        addressed to a single destination node.
+      tags: [Messaging]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendDirectMessageRequest"
+            example:
+              to: "device_id_target_node"
+              message: "Direct message to node"
+              ack: true
+      responses:
+        "200":
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /services/meshtastic/broadcast_channel_message:
+    post:
+      operationId: broadcastChannelMessage
+      summary: Broadcast a message to a channel
+      description: |
+        Broadcast a text message to all nodes on a specific Meshtastic channel.
+        Uses the broadcast address (0xFFFFFFFF) as the destination.
+      tags: [Messaging]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BroadcastChannelMessageRequest"
+            example:
+              channel: "entity_id_longfast_channel"
+              message: "Broadcast to all nodes on channel"
+              ack: true
+      responses:
+        "200":
+          description: Message broadcast successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /services/meshtastic/request_telemetry:
+    post:
+      operationId: requestTelemetry
+      summary: Request telemetry from a node
+      description: |
+        Request telemetry data from a specific Meshtastic node.
+        **Not available in MQTT-only mode** — raises an error if the
+        connection type is MQTT.
+      tags: [Requests]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestTelemetryRequest"
+            example:
+              from: "device_id_gateway"
+              type: "device_metrics"
+              to: "device_id_target_node"
+      responses:
+        "200":
+          description: Telemetry request sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /services/meshtastic/request_position:
+    post:
+      operationId: requestPosition
+      summary: Request position from a node
+      description: |
+        Request GPS position data from a specific Meshtastic node.
+        **Not available in MQTT-only mode** — raises an error if the
+        connection type is MQTT.
+      tags: [Requests]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestPositionRequest"
+            example:
+              from: "device_id_gateway"
+              to: "device_id_target_node"
+      responses:
+        "200":
+          description: Position request sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /services/meshtastic/request_traceroute:
+    post:
+      operationId: requestTraceroute
+      summary: Request traceroute to a node
+      description: |
+        Request a traceroute to a specific Meshtastic node, showing the
+        hop path through the mesh network.
+        **Not available in MQTT-only mode** — raises an error if the
+        connection type is MQTT.
+      tags: [Requests]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestTracerouteRequest"
+            example:
+              from: "device_id_gateway"
+              to: "device_id_target_node"
+      responses:
+        "200":
+          description: Traceroute request sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: "Long-Lived Access Token"
+      description: |
+        Home Assistant long-lived access token. Generate one from your
+        HA profile page at `/profile` → Long-Lived Access Tokens.
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            message: "Invalid service data"
+    Unauthorized:
+      description: Missing or invalid authentication
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            message: "Invalid access token"
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            message: "Not supported in MQTT mode"
+
+  schemas:
+    # ── Service Request Schemas ──────────────────────────────────────
+
+    SendTextRequest:
+      type: object
+      required: [text, ack]
+      properties:
+        from:
+          type: string
+          description: Device ID of the gateway node to send from
+          example: "device_id_gateway"
+        text:
+          type: string
+          description: Text message content
+          example: "Hello from Home Assistant"
+        to:
+          type: string
+          description: Device ID of the target node (omit for default destination)
+        channel:
+          type: string
+          description: Entity ID of the channel to send on
+          example: "meshtastic.channel_longfast"
+        ack:
+          type: boolean
+          description: Whether to request delivery acknowledgement
+          example: true
+
+    SendDirectMessageRequest:
+      type: object
+      required: [to, message, ack]
+      properties:
+        to:
+          type: string
+          description: Device ID of the target node
+          example: "device_id_target_node"
+        message:
+          type: string
+          description: Message text content
+          example: "Direct message to node"
+        ack:
+          type: boolean
+          description: Whether to request delivery acknowledgement
+          default: true
+          example: true
+
+    BroadcastChannelMessageRequest:
+      type: object
+      required: [channel, message, ack]
+      properties:
+        channel:
+          type: string
+          description: Entity ID of the channel to broadcast on
+          example: "meshtastic.channel_longfast"
+        message:
+          type: string
+          description: Message text content
+          example: "Broadcast to all nodes"
+        ack:
+          type: boolean
+          description: Whether to request delivery acknowledgement
+          default: true
+          example: true
+
+    RequestTelemetryRequest:
+      type: object
+      required: [type, to]
+      properties:
+        from:
+          type: string
+          description: Device ID of the gateway node
+          example: "device_id_gateway"
+        type:
+          type: string
+          description: Type of telemetry to request
+          enum:
+            - device_metrics
+            - environment_metrics
+            - power_metrics
+            - air_quality_metrics
+          example: "device_metrics"
+        to:
+          type: string
+          description: Device ID of the target node
+          example: "device_id_target_node"
+
+    RequestPositionRequest:
+      type: object
+      required: [to]
+      properties:
+        from:
+          type: string
+          description: Device ID of the gateway node
+          example: "device_id_gateway"
+        to:
+          type: string
+          description: Device ID of the target node
+          example: "device_id_target_node"
+
+    RequestTracerouteRequest:
+      type: object
+      required: [to]
+      properties:
+        from:
+          type: string
+          description: Device ID of the gateway node
+          example: "device_id_gateway"
+        to:
+          type: string
+          description: Device ID of the target node
+          example: "device_id_target_node"
+
+    # ── Response Schemas ─────────────────────────────────────────────
+
+    ServiceResponse:
+      type: object
+      description: Successful service call response (HA returns empty object on success)
+      example: {}
+
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          description: Human-readable error description
+          example: "Service call failed"
+
+    # ── MQTT Message Schemas (Protobuf → JSON Schema) ────────────────
+
+    ServiceEnvelope:
+      type: object
+      description: |
+        Outer MQTT protobuf wrapper (mqtt_pb2.ServiceEnvelope). Transports
+        a MeshPacket along with channel and gateway metadata. Published to
+        topics matching `msh/{region}/2/e/{channel}/{gateway_id}`.
+      required: [packet, channel_id, gateway_id]
+      properties:
+        packet:
+          $ref: "#/components/schemas/MeshPacket"
+        channel_id:
+          type: string
+          description: Channel name (e.g., "LongFast")
+          example: "LongFast"
+        gateway_id:
+          type: string
+          description: Gateway node ID string (e.g., "!a1b2c3d4")
+          example: "!a1b2c3d4"
+
+    MeshPacket:
+      type: object
+      description: |
+        Core Meshtastic protobuf message (mesh_pb2.MeshPacket) containing
+        routing metadata and either an encrypted or decoded Data payload.
+      required: [from, to, id]
+      properties:
+        from:
+          type: integer
+          format: uint32
+          description: Sender node number
+          example: 2718281828
+        to:
+          type: integer
+          format: uint32
+          description: Destination node number (0xFFFFFFFF for broadcast)
+          example: 4294967295
+        id:
+          type: integer
+          format: uint32
+          description: Unique packet identifier
+          example: 123456789
+        channel:
+          type: integer
+          description: Channel index
+          example: 0
+        rx_time:
+          type: integer
+          format: uint32
+          description: Receive timestamp (seconds since epoch)
+          example: 1700000000
+        rx_snr:
+          type: number
+          format: float
+          description: Receive signal-to-noise ratio in dB
+          example: 10.5
+        rx_rssi:
+          type: integer
+          description: Receive signal strength in dBm
+          example: -90
+        hop_limit:
+          type: integer
+          description: Remaining hop limit
+          example: 3
+        hop_start:
+          type: integer
+          description: Original hop limit at send time
+          example: 3
+        decoded:
+          $ref: "#/components/schemas/Data"
+        encrypted:
+          type: string
+          format: byte
+          description: Base64-encoded encrypted payload (mutually exclusive with decoded)
+
+    Data:
+      type: object
+      description: |
+        Decoded application payload (mesh_pb2.Data). The `payload` field
+        contains a serialized protobuf specific to the `portnum`.
+      required: [portnum, payload]
+      properties:
+        portnum:
+          type: string
+          description: Application port number identifying the payload type
+          enum:
+            - UNKNOWN_APP
+            - TEXT_MESSAGE_APP
+            - REMOTE_HARDWARE_APP
+            - POSITION_APP
+            - NODEINFO_APP
+            - ROUTING_APP
+            - ADMIN_APP
+            - TEXT_MESSAGE_COMPRESSED_APP
+            - WAYPOINT_APP
+            - AUDIO_APP
+            - DETECTION_SENSOR_APP
+            - REPLY_APP
+            - IP_TUNNEL_APP
+            - PAXCOUNTER_APP
+            - SERIAL_APP
+            - STORE_FORWARD_APP
+            - RANGE_TEST_APP
+            - TELEMETRY_APP
+            - ZPS_APP
+            - SIMULATOR_APP
+            - TRACEROUTE_APP
+            - NEIGHBORINFO_APP
+            - ATAK_PLUGIN
+            - MAP_REPORT_APP
+            - PRIVATE_APP
+            - ATAK_FORWARDER
+            - MAX
+          example: "TEXT_MESSAGE_APP"
+        payload:
+          type: string
+          format: byte
+          description: Base64-encoded serialized protobuf payload
+        request_id:
+          type: integer
+          format: uint32
+          description: Request ID for response correlation
+        want_response:
+          type: boolean
+          description: Whether a response is requested
+
+    # ── Home Assistant Event Payloads ────────────────────────────────
+
+    MeshtasticEvent:
+      type: object
+      description: |
+        Home Assistant event payload fired on the HA event bus when a
+        decoded Meshtastic packet is received. Event type: `meshtastic_event`.
+      required: [event_type, from, to]
+      properties:
+        event_type:
+          type: string
+          description: Sub-type of the Meshtastic event
+          enum:
+            - text_message
+            - position
+            - telemetry
+            - node_info
+          example: "text_message"
+        from:
+          type: integer
+          format: uint32
+          description: Sender node number
+          example: 2718281828
+        to:
+          type: integer
+          format: uint32
+          description: Destination node number (0xFFFFFFFF = broadcast)
+          example: 4294967295
+        channel:
+          type: string
+          description: Channel name the message was received on
+          example: "LongFast"
+        message:
+          type: string
+          description: Text content (present when event_type is text_message)
+          example: "Hello mesh!"
+        position:
+          $ref: "#/components/schemas/PositionData"
+        telemetry:
+          $ref: "#/components/schemas/TelemetryData"
+        node_info:
+          $ref: "#/components/schemas/NodeInfoData"
+
+    MeshtasticMessageLog:
+      type: object
+      description: |
+        Home Assistant event payload for message logging.
+        Event type: `meshtastic_message_log`.
+      required: [from, to, portnum, timestamp]
+      properties:
+        from:
+          type: integer
+          format: uint32
+          description: Sender node number
+          example: 2718281828
+        to:
+          type: integer
+          format: uint32
+          description: Destination node number
+          example: 4294967295
+        portnum:
+          type: string
+          description: Application port name
+          example: "TEXT_MESSAGE_APP"
+        payload:
+          type: string
+          description: Human-readable payload summary
+          example: "Hello mesh!"
+        channel:
+          type: string
+          description: Channel name
+          example: "LongFast"
+        timestamp:
+          type: integer
+          format: uint32
+          description: Receive timestamp (seconds since epoch)
+          example: 1700000000
+        rx_snr:
+          type: number
+          format: float
+          description: Signal-to-noise ratio in dB
+          example: 10.5
+        rx_rssi:
+          type: integer
+          description: Signal strength in dBm
+          example: -90
+        hop_limit:
+          type: integer
+          description: Remaining hop count
+          example: 3
+
+    # ── Nested Data Schemas ──────────────────────────────────────────
+
+    PositionData:
+      type: object
+      description: GPS position data from POSITION_APP packets
+      properties:
+        latitude:
+          type: number
+          format: double
+          description: Latitude in degrees (converted from latitudeI × 1e-7)
+          example: 47.6062
+        longitude:
+          type: number
+          format: double
+          description: Longitude in degrees (converted from longitudeI × 1e-7)
+          example: -122.3321
+        altitude:
+          type: integer
+          description: Altitude in meters above sea level
+          example: 56
+        time:
+          type: integer
+          format: uint32
+          description: GPS fix timestamp (seconds since epoch)
+
+    TelemetryData:
+      type: object
+      description: Telemetry data from TELEMETRY_APP packets
+      properties:
+        battery_level:
+          type: integer
+          description: Battery charge percentage (0-100)
+          example: 85
+        voltage:
+          type: number
+          format: float
+          description: Battery voltage in volts
+          example: 3.95
+        channel_utilization:
+          type: number
+          format: float
+          description: Channel utilization percentage
+          example: 12.5
+        air_util_tx:
+          type: number
+          format: float
+          description: Airtime utilization TX percentage
+          example: 3.2
+        temperature:
+          type: number
+          format: float
+          description: Temperature in Celsius (environment metrics)
+          example: 22.5
+        relative_humidity:
+          type: number
+          format: float
+          description: Relative humidity percentage (environment metrics)
+          example: 45.0
+        barometric_pressure:
+          type: number
+          format: float
+          description: Barometric pressure in hPa (environment metrics)
+          example: 1013.25
+
+    NodeInfoData:
+      type: object
+      description: Node information from NODEINFO_APP packets
+      properties:
+        num:
+          type: integer
+          format: uint32
+          description: Node number
+          example: 2718281828
+        long_name:
+          type: string
+          description: Node long name
+          example: "My Meshtastic Node"
+        short_name:
+          type: string
+          description: Node short name (up to 4 characters)
+          example: "MMN"
+        hw_model:
+          type: string
+          description: Hardware model name
+          example: "TBEAM"
+        mac_addr:
+          type: string
+          format: byte
+          description: Base64-encoded MAC address
+
+    # ── MQTT Connection Configuration ────────────────────────────────
+
+    MqttConnectionConfig:
+      type: object
+      description: |
+        MQTT connection configuration stored in the Home Assistant config
+        entry. Provided during integration setup via the config flow.
+      required: [connection_type, mqtt_host, mqtt_port, mqtt_topic, mqtt_channel_keys]
+      properties:
+        connection_type:
+          type: string
+          const: mqtt
+          description: Connection type identifier
+          example: "mqtt"
+        mqtt_host:
+          type: string
+          minLength: 1
+          description: MQTT broker hostname or IP address
+          example: "mqtt.meshtastic.org"
+        mqtt_port:
+          type: integer
+          minimum: 1
+          maximum: 65535
+          default: 1883
+          description: MQTT broker port
+          example: 1883
+        mqtt_username:
+          type: string
+          description: MQTT broker username (optional)
+          example: "meshdev"
+        mqtt_password:
+          type: string
+          format: password
+          description: MQTT broker password (optional)
+          example: "large4cats"
+        mqtt_tls:
+          type: boolean
+          default: false
+          description: Enable TLS for the MQTT connection
+          example: false
+        mqtt_topic:
+          type: string
+          default: "msh/US/2/e/#"
+          description: |
+            MQTT topic pattern to subscribe to. Supports MQTT wildcards
+            (`+` single level, `#` multi level). Follows the Meshtastic
+            convention: `msh/{region}/2/e/{channel}/{gateway_id}`.
+          example: "msh/US/2/e/#"
+        mqtt_region:
+          type: string
+          default: "US"
+          description: Meshtastic region code for topic construction
+          example: "US"
+        mqtt_channel_keys:
+          type: object
+          description: |
+            Map of channel names to base64-encoded AES encryption keys.
+            At least one channel key is required.
+          additionalProperties:
+            type: string
+            format: byte
+            description: Base64-encoded AES key (16 or 32 bytes decoded)
+          example:
+            LongFast: "AQ=="
+            ShortSlow: "dGVzdGtleQ=="
+
+    # ── AES-CTR Encryption Schema ────────────────────────────────────
+
+    AesCtrParameters:
+      type: object
+      description: |
+        AES-CTR encryption parameters used for Meshtastic packet decryption.
+        The nonce is constructed from the packet ID and sender node ID.
+      properties:
+        nonce:
+          type: string
+          format: byte
+          description: |
+            16-byte nonce: packet_id as 8 bytes little-endian concatenated
+            with from_node_id as 8 bytes little-endian.
+        key_length:
+          type: integer
+          enum: [16, 32]
+          description: |
+            AES key length in bytes after preparation. Keys ≤16 bytes
+            (after 0x01 expansion) produce 16-byte keys; 17–32 bytes
+            produce 32-byte keys; >32 bytes are truncated to 32.
+
+    # ── MQTT Topic Schema ────────────────────────────────────────────
+
+    MqttTopicStructure:
+      type: object
+      description: |
+        Meshtastic MQTT topic structure. The channel name is extracted by
+        locating the type indicator (`e`, `c`, or `json`) and taking the
+        next path segment.
+      properties:
+        standard:
+          type: string
+          description: Standard encrypted topic format
+          example: "msh/US/2/e/LongFast/!a1b2c3d4"
+        extended:
+          type: string
+          description: Extended topic with area/network segments
+          example: "msh/US/CA/NorCal/2/e/LongFast/!a1b2c3d4"
+        json:
+          type: string
+          description: JSON-format topic
+          example: "msh/US/2/json/LongFast/!a1b2c3d4"
+        pattern:
+          type: string
+          description: Wildcard subscription pattern
+          example: "msh/US/2/e/#"
