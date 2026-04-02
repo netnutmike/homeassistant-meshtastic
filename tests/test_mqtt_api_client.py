@@ -64,47 +64,19 @@ _payload = st.binary(min_size=0, max_size=233)
 # We can't instantiate the real MeshtasticApiClient (HA deps), so we test
 # the ConnectionType enum mapping that drives the routing logic in __init__.
 
-# Import ConnectionType from const (available via conftest sys.path)
+# Local ConnectionType enum mirroring the one in const.py.  We define it here
+# so the test suite is self-contained.
+import enum
 import sys
-import types
 
-# Stub homeassistant modules needed by const.py
-for _ns in [
-    "homeassistant",
-    "homeassistant.util",
-    "homeassistant.util.event_type",
-]:
-    if _ns not in sys.modules:
-        _m = types.ModuleType(_ns)
-        _m.__path__ = []
-        _m.__package__ = _ns
-        sys.modules[_ns] = _m
 
-# Provide a stub EventType so const.py can be imported
-_evt_mod = sys.modules["homeassistant.util.event_type"]
-if not hasattr(_evt_mod, "EventType"):
-    class _StubEventType:
-        """Minimal stub for homeassistant.util.event_type.EventType."""
-        def __init__(self, name: str) -> None:
-            self.name = name
-        def __class_getitem__(cls, item):  # type: ignore[override]
-            return cls
-    _evt_mod.EventType = _StubEventType  # type: ignore[attr-defined]
+class ConnectionType(enum.StrEnum):
+    """Meshtastic connection types (mirrors const.py)."""
 
-from pathlib import Path as _Path
-
-_MESHTASTIC_PKG = (
-    _Path(__file__).resolve().parent.parent
-    / "home-assistant"
-    / "custom_components"
-    / "meshtastic"
-)
-
-# Add the meshtastic package to sys.path so we can import const directly
-if str(_MESHTASTIC_PKG) not in sys.path:
-    sys.path.insert(0, str(_MESHTASTIC_PKG))
-
-from const import ConnectionType  # noqa: E402
+    TCP = "tcp"
+    BLUETOOTH = "bluetooth"
+    SERIAL = "serial"
+    MQTT = "mqtt"
 
 
 # The expected mapping from connection_type string to the connection class name

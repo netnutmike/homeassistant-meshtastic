@@ -222,7 +222,7 @@ Launch configurations are provided in `.vscode/launch.json`. Available configura
 2. Set breakpoints by clicking in the gutter next to line numbers in any Python file.
 3. Open the Run and Debug panel (Ctrl+Shift+D / Cmd+Shift+D).
 4. Select a launch configuration from the dropdown:
-   - **Home Assistant (with Meshtastic)**: Launches HA using the `home-assistant/config` directory. Breakpoints work across the integration code as it handles real events.
+   - **Home Assistant (with Meshtastic)**: Launches HA with the integration loaded. Breakpoints work across the integration code as it handles real events.
    - **Debug Tests**: Runs the full test suite with breakpoints active. Execution will pause at any breakpoint hit during test runs.
    - **Debug Current Test File**: Runs the currently focused test file with the debugger. Useful for iterating on a single test.
    - **Attach to Running Process**: Connects to an already-running Python process that has `debugpy` listening on port 5678. Add `import debugpy; debugpy.listen(5678); debugpy.wait_for_client()` to the target process to enable this.

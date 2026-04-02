@@ -17,8 +17,8 @@ hypothesis_settings.load_profile("dev")
 # ---------------------------------------------------------------------------
 # sys.path / module bootstrapping
 # ---------------------------------------------------------------------------
-# The aiomeshtastic package lives inside the Home Assistant custom component
-# tree.  Its top-level ``__init__.py`` eagerly imports connection classes that
+# The aiomeshtastic package lives inside custom_components/meshtastic/ in this
+# repo.  Its top-level ``__init__.py`` eagerly imports connection classes that
 # pull in heavy HA-specific dependencies (``homeassistant``, ``aiomqtt``, …).
 # To let the *protobuf* and *decoder* modules be imported in a lightweight
 # test environment we pre-register stub namespace packages so Python never
@@ -26,7 +26,6 @@ hypothesis_settings.load_profile("dev")
 
 _MESHTASTIC_PKG = (
     Path(__file__).resolve().parent.parent
-    / "home-assistant"
     / "custom_components"
     / "meshtastic"
 )

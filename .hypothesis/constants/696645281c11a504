@@ -1,4 +1,0 @@
-# file: /Users/mikemyers/Documents/Development/homeassistant-meshtastic/home-assistant/custom_components/meshtastic/const.py
-# hypothesis_version: 6.151.10
-
-[4403, '/meshtastic', 'ack', 'add_another_node', 'all', 'bluetooth', 'bluetooth_address', 'channel', 'channels', 'connection_type', 'enable', 'from', 'from_name', 'index', 'meshtastic', 'message', 'message.received', 'message.sent', 'mqtt', 'mqtt_channel_keys', 'mqtt_host', 'mqtt_password', 'mqtt_port', 'mqtt_region', 'mqtt_tls', 'mqtt_topic', 'mqtt_username', 'node', 'nodes', 'none', 'notify_platform', 'pki', 'port', 'request_position', 'request_telemetry', 'request_traceroute', 'selected', 'send_direct_message', 'send_text', 'serial', 'serial_port', 'tcp', 'tcp_host', 'tcp_port', 'tcp_proxy', 'text', 'to', 'type', 'web_client']

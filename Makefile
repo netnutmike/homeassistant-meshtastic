@@ -22,10 +22,10 @@ install: $(VENV)/bin/activate ## Install development dependencies
 	$(PIP) install -r requirements-dev.txt
 
 test: ## Run tests with coverage (80% threshold)
-	$(PYTEST) tests/ -v --cov=home-assistant/custom_components/meshtastic --cov-report=term-missing --cov-fail-under=80
+	$(PYTEST) tests/ -v --cov=custom_components/meshtastic --cov-report=term-missing --cov-fail-under=80
 
 test-watch: ## Run tests in watch mode
-	$(PYTEST) tests/ -v --cov=home-assistant/custom_components/meshtastic -f
+	$(PYTEST) tests/ -v --cov=custom_components/meshtastic -f
 
 lint: ## Run linter and format checks
 	$(RUFF) check .
@@ -36,7 +36,7 @@ lint-fix: ## Run linter and formatter with auto-fix
 	$(RUFF) format .
 
 type-check: ## Run mypy type checking
-	$(MYPY) home-assistant/custom_components/meshtastic --ignore-missing-imports
+	$(MYPY) custom_components/meshtastic --ignore-missing-imports
 
 verify-setup: ## Verify all development prerequisites are installed
 	@echo "=== Development Environment Verification ==="

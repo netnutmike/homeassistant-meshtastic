@@ -1,4 +1,4 @@
-# file: /Users/mikemyers/Documents/Development/homeassistant-meshtastic/home-assistant/custom_components/meshtastic/aiomeshtastic/protobuf/config_pb2.py
+# file: /Users/mikemyers/Documents/Development/homeassistant-meshtastic/custom_components/meshtastic/aiomeshtastic/protobuf/config_pb2.py
 # hypothesis_version: 6.151.10
 
 [b'\x08\x01', b'\x18\x01', 137, 906, 1337, 1528, 1530, 1645, 1648, 2102, 2273, 2275, 2328, 2331, 2591, 2594, 2942, 3012, 3014, 3049, 3051, 3103, 3106, 3740, 3817, 3819, 3859, 3861, 3938, 3940, 4005, 4008, 4194, 4197, 4755, 4996, 4999, 5168, 5171, 5311, 5367, 5370, 5552, 5554, 5572, 5591, 'DESCRIPTOR', 'ROUTER_CLIENT', 'VERY_LONG_SLOW', '_CONFIG', '_CONFIG_DEVICECONFIG', '_CONFIG_LORACONFIG', '_CONFIG_POWERCONFIG', 'gps_attempt_time', 'gps_enabled', 'is_managed', 'serial_enabled']

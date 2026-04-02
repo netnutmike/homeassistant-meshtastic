@@ -1,4 +1,0 @@
-# file: /Users/mikemyers/Documents/Development/homeassistant-meshtastic/home-assistant/custom_components/meshtastic/aiomeshtastic/connection/errors.py
-# hypothesis_version: 6.151.10
-
-['Connect failed', 'Disconnect failed', 'Not connected']

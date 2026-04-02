@@ -8,7 +8,7 @@
             "module": "homeassistant",
             "args": [
                 "--config",
-                "${workspaceFolder}/home-assistant/config"
+                "${workspaceFolder}/config"
             ],
             "justMyCode": false,
             "console": "integratedTerminal"

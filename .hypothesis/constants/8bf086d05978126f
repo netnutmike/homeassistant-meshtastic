@@ -1,4 +1,4 @@
-# file: /Users/mikemyers/Documents/Development/homeassistant-meshtastic/home-assistant/custom_components/meshtastic/aiomeshtastic/protobuf/channel_pb2.py
+# file: /Users/mikemyers/Documents/Development/homeassistant-meshtastic/custom_components/meshtastic/aiomeshtastic/protobuf/channel_pb2.py
 # hypothesis_version: 6.151.10
 
 [b'\x18\x01', 294, 296, 365, 368, 527, 575, 'DESCRIPTOR', '_CHANNEL', '_CHANNELSETTINGS', '_CHANNEL_ROLE', '_MODULESETTINGS', 'channel_num']

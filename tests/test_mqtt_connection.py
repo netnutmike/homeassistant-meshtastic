@@ -85,21 +85,8 @@ from aiomeshtastic.protobuf import mesh_pb2, mqtt_pb2  # noqa: E402
 import aiomeshtastic.connection.errors  # noqa: E402
 
 # The base class lives in __init__.py which has heavy HA deps.  We need to
-# make it importable.  The conftest already stubs the package; we just need
-# to populate the ``ClientApiConnection`` name.  Import it from the real file
-# by loading the module source directly.
-import importlib.util as _ilu
-from pathlib import Path as _Path
-
-_conn_init = (
-    _Path(__file__).resolve().parent.parent
-    / "home-assistant"
-    / "custom_components"
-    / "meshtastic"
-    / "aiomeshtastic"
-    / "connection"
-    / "__init__.py"
-)
+# The conftest already stubs the package; we just need
+# to populate the ``ClientApiConnection`` name.
 
 # We can't exec the real __init__.py (it imports homeassistant, google, etc.).
 # Instead, create a minimal stub of ClientApiConnection with the interface

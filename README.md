@@ -119,24 +119,19 @@ make test-watch
 
 ```
 homeassistant-meshtastic/
-├── home-assistant/
-│   └── custom_components/meshtastic/  # The HA integration
-│       ├── aiomeshtastic/             # Async Meshtastic library
-│       │   ├── connection/            # Connection implementations
-│       │   │   ├── mqtt.py            # MQTT connection (new)
-│       │   │   ├── decoder.py         # MQTT message decoder (new)
-│       │   │   ├── tcp.py             # TCP connection
-│       │   │   ├── bluetooth.py       # Bluetooth connection
-│       │   │   ├── serial.py          # Serial connection
-│       │   │   └── streaming.py       # Base streaming transport
-│       │   ├── protobuf/              # Meshtastic protobuf definitions
-│       │   └── interface.py           # Mesh network interface
-│       ├── api.py                     # HA API client
-│       ├── config_flow.py             # Setup wizard
-│       ├── coordinator.py             # Data update coordinator
-│       ├── sensor.py                  # Sensor entities
-│       ├── const.py                   # Constants
-│       └── ...
+├── custom_components/meshtastic/      # The HA integration
+│   └── aiomeshtastic/                 # Async Meshtastic library
+│       ├── connection/                # Connection implementations
+│       │   ├── mqtt.py                # MQTT connection
+│       │   ├── decoder.py             # MQTT message decoder
+│       │   ├── errors.py              # Connection error classes
+│       │   ├── listener.py            # Packet stream listener
+│       │   └── streaming.py           # Base streaming transport
+│       ├── protobuf/                  # Meshtastic protobuf definitions
+│       ├── interface.py               # Mesh network interface
+│       ├── packet.py                  # Packet utilities
+│       ├── errors.py                  # Base error classes
+│       └── const.py                   # Library constants
 ├── tests/                             # Test suite
 ├── docs/                              # Documentation
 │   ├── api/                           # OpenAPI spec + Swagger UI

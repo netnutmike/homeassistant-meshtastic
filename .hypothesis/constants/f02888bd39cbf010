@@ -1,4 +1,4 @@
-# file: /Users/mikemyers/Documents/Development/homeassistant-meshtastic/home-assistant/custom_components/meshtastic/aiomeshtastic/protobuf/telemetry_pb2.py
+# file: /Users/mikemyers/Documents/Development/homeassistant-meshtastic/custom_components/meshtastic/aiomeshtastic/protobuf/telemetry_pb2.py
 # hypothesis_version: 6.151.10
 
 [332, 335, 1049, 1052, 1318, 1321, 1966, 1969, 2256, 2258, 2381, 2384, 2887, 2889, 2951, 2954, 3439, 'DESCRIPTOR', '_AIRQUALITYMETRICS', '_DEVICEMETRICS', '_ENVIRONMENTMETRICS', '_HEALTHMETRICS', '_LOCALSTATS', '_NAU7802CONFIG', '_POWERMETRICS', '_TELEMETRY', '_TELEMETRYSENSORTYPE']

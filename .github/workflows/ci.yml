@@ -48,7 +48,7 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Type check (mypy)
-        run: mypy home-assistant/custom_components/meshtastic --ignore-missing-imports
+        run: mypy custom_components/meshtastic --ignore-missing-imports
 
   security:
     name: Security Scan
@@ -111,7 +111,7 @@ jobs:
       - name: Run tests with coverage
         run: |
           pytest tests/ \
-            --cov=home-assistant/custom_components/meshtastic \
+            --cov=custom_components/meshtastic \
             --cov-report=xml:coverage.xml \
             --cov-report=term-missing \
             --cov-fail-under=80 \

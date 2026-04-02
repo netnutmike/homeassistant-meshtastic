@@ -5,28 +5,28 @@
 The integration supports four connection methods to Meshtastic mesh networks:
 
 ```
-                     +----------------------+
-                     |    Home Assistant     |
-                     |   Meshtastic Integ.   |
-                     +------+---------------+
-                            |
-           +--------+-------+--------+---------+
-           |        |       |        |         |
-        +--v--+  +--v--+ +-v--+  +--v---+    |
-        | TCP |  | BLE | |USB |  | MQTT |    |
-        +--+--+  +--+--+ +-+--+  +--+---+    |
-           |        |      |        |         |
-        +--v--------v------v--+  +--v-------+|
-        |  Physical Meshtastic|  |MQTT Broker||
-        |       Node          |  |           ||
-        +---------+-----------+  +--+-------+|
-                  |                 |         |
-                  +--------+--------+         |
-                           |                  |
-                  +--------v--------+         |
-                  |  Meshtastic     |         |
-                  |  Mesh Network   |<--------+
-                  +-----------------+
+                     ┌──────────────────────┐
+                     │    Home Assistant     │
+                     │   Meshtastic Integ.   │
+                     └──────┬───────────────┘
+                            │
+           ┌────────┬───────┼────────┬─────────┐
+           │        │       │        │         │
+        ┌──▼──┐  ┌──▼──┐ ┌─▼──┐  ┌──▼───┐    │
+        │ TCP │  │ BLE │ │USB │  │ MQTT │    │
+        └──┬──┘  └──┬──┘ └─┬──┘  └──┬───┘    │
+           │        │      │        │         │
+        ┌──▼────────▼──────▼──┐  ┌──▼───────┐│
+        │  Physical Meshtastic│  │MQTT Broker││
+        │       Node          │  │           ││
+        └─────────┬───────────┘  └──┬───────┘│
+                  │                 │         │
+                  └────────┬────────┘         │
+                           │                  │
+                  ┌────────▼────────┐         │
+                  │  Meshtastic     │         │
+                  │  Mesh Network   │◄────────┘
+                  └─────────────────┘
 ```
 
 ### MQTT Connection
@@ -65,8 +65,8 @@ Nodes are automatically discovered from mesh traffic. Each node becomes a Home A
 
 | Packet Type | Data Extracted |
 |-------------|---------------|
-| `NODEINFO_APP` | Node identity -- long name, short name, hardware model |
-| `POSITION_APP` | GPS coordinates -- latitude, longitude, altitude |
+| `NODEINFO_APP` | Node identity — long name, short name, hardware model |
+| `POSITION_APP` | GPS coordinates — latitude, longitude, altitude |
 | `TELEMETRY_APP` | Battery, voltage, channel utilization, environment data |
 | `TEXT_MESSAGE_APP` | Text messages (fired as HA events) |
 

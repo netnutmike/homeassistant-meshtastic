@@ -1,4 +1,4 @@
-# file: /Users/mikemyers/Documents/Development/homeassistant-meshtastic/home-assistant/custom_components/meshtastic/aiomeshtastic/protobuf/mqtt_pb2.py
+# file: /Users/mikemyers/Documents/Development/homeassistant-meshtastic/custom_components/meshtastic/aiomeshtastic/protobuf/mqtt_pb2.py
 # hypothesis_version: 6.151.10
 
 [177, 297, 300, 836, 'DESCRIPTOR', '_MAPREPORT', '_SERVICEENVELOPE']

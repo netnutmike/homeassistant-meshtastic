@@ -149,7 +149,7 @@ A typical development cycle looks like this:
 
 ## Code Style
 
-We use [ruff](https://docs.astral.sh/ruff/) for linting and formatting, configured in `home-assistant/.ruff.toml`.
+We use [ruff](https://docs.astral.sh/ruff/) for linting and formatting.
 
 ```bash
 make lint       # Check for issues
