@@ -2,7 +2,7 @@
 
 ## Overview
 
-This plan implements MQTT as a fourth connection type for the Meshtastic Home Assistant integration, along with repository infrastructure (Docker, CI/CD, docs, developer tooling). Tasks are ordered so foundational components (decoder, connection class) come first, followed by integration points (config flow, API client, setup entry), then infrastructure (Docker, CI, docs).
+This plan implements MQTT as a fourth connection type for the Meshtastic Home Assistant integration, along with repository infrastructure (CI/CD, docs, developer tooling). Tasks are ordered so foundational components (decoder, connection class) come first, followed by integration points (config flow, API client, setup entry), then infrastructure (CI, docs).
 
 ## Tasks
 
@@ -185,121 +185,80 @@ This plan implements MQTT as a fourth connection type for the Meshtastic Home As
     - Allow testing API endpoints from the browser
     - _Requirements: 10.5, 10.9_
 
-- [ ] 9. Docker containerization
-  - [ ] 9.1 Create `Dockerfile` at repository root
-    - Use multi-stage build with official Home Assistant base image
-    - Install Python dependencies (aiomqtt, cryptography, pyserial-asyncio, paho-mqtt)
-    - Copy integration into `custom_components/meshtastic/`
-    - Support environment variable configuration
-    - Include health check, non-root user, proper signal handling
-    - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8_
-
-  - [ ] 9.2 Create `.dockerignore` file
-    - Exclude `.git/`, `__pycache__/`, `*.pyc`, `.env`, `tests/`, `docs/`, `.vscode/`, `.devcontainer/`
-    - _Requirements: 11.9_
-
-  - [ ] 9.3 Create `docker-compose.yaml` for development
-    - Define Home Assistant service with integration
-    - Mount source code as volumes for hot-reload development
-    - Mount `./config` directory for persistent HA configuration
-    - Configure environment variables with sensible defaults
-    - Expose port 8123
-    - Include health checks
-    - Mount `custom_components/` directory for hot-reload
-    - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5_
-
-  - [ ] 9.4 Create `docker-compose.prod.yaml` for production
-    - Optimized settings, no source code mounts
-    - _Requirements: 12.6_
-
-- [ ] 10. CI/CD workflows
-  - [ ] 10.1 Create `.github/workflows/ci.yml`
+- [ ] 9. CI/CD workflows
+  - [ ] 9.1 Create `.github/workflows/ci.yml`
     - Trigger on PRs and commits to `dev` and `main` branches
     - Run unit tests, integration tests, linting (ruff), type checking (mypy), security scanning
     - Generate code coverage reports, fail if below 80%
-    - Build Docker images for `dev` branch (verify Dockerfile, no push)
     - Validate OpenAPI specification
     - Run on Python 3.12+
     - Comment on PRs with test results and coverage summary
-    - _Requirements: 20.1, 20.2, 20.3, 20.4, 20.5, 20.6, 20.7, 20.8_
+    - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.7_
 
-  - [ ] 10.2 Create `.github/workflows/docker-publish.yml`
-    - Trigger on release tags (`v*`)
-    - Build and push Docker images to Docker Hub with version tags, `latest`, and Git SHA
-    - Multi-architecture builds (amd64, arm64)
-    - Run security scanning (Trivy), fail on critical vulnerabilities
-    - Authenticate with Docker Hub using GitHub secrets
-    - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 13.7_
-
-- [-] 11. Repository structure and documentation
-  - [x] 11.1 Create/update `README.md` at repository root
+- [-] 10. Repository structure and documentation
+  - [x] 10.1 Create/update `README.md` at repository root
     - Project overview, features list, quick start guide
-    - Installation instructions for all dependencies
-    - Docker Compose usage for dev and production
+    - Installation instructions (HACS and manual)
     - Troubleshooting guidance
     - Links to `docs/` directory and API documentation
-    - _Requirements: 10.11, 12.7, 14.1, 14.12_
+    - _Requirements: 10.11, 11.1, 11.12_
 
-  - [ ] 11.2 Create `CONTRIBUTING.md`
+  - [ ] 10.2 Create `CONTRIBUTING.md`
     - Contribution guidelines, code style (ruff), PR process
     - Branching strategy: `main`/`dev` with feature branches from `dev`, hotfix from `main`
     - Branch protection guidance (CI checks, code review, no force push, no branch deletion)
     - Development workflow description
     - _Requirements: 14.2, 19.1, 19.2, 19.3, 19.4_
 
-  - [x] 11.3 Create `LICENSE` file with MIT license
+  - [x] 10.3 Create `LICENSE` file with MIT license
     - _Requirements: 14.3_
 
-  - [ ] 11.4 Create `CHANGELOG.md` following Keep a Changelog format
+  - [ ] 10.4 Create `CHANGELOG.md` following Keep a Changelog format
     - _Requirements: 14.4, 16.5, 16.6, 19.5_
 
-  - [ ] 11.5 Create `.env.example` with documented environment variables
+  - [ ] 10.5 Create `.env.example` with documented environment variables
     - _Requirements: 14.5, 17.2_
 
-  - [ ] 11.6 Create documentation files in `docs/` directory
+  - [ ] 10.6 Create documentation files in `docs/` directory
     - `docs/README.md` as index page linking to all docs
     - `docs/user-guide.md` with configuration and usage instructions
     - `docs/developer-guide.md` with architecture, contributing, testing, debugging
     - `docs/features.md` with feature descriptions and usage examples
     - _Requirements: 14.6, 14.7, 14.8, 14.9, 14.10, 14.11, 18.5_
 
-- [-] 12. Developer environment and tooling
-  - [x] 12.1 Create `.gitignore` at repository root
-    - Exclude: `__pycache__/`, `*.pyc`, `*.pyo`, `*.egg-info/`, `dist/`, `build/`, `.eggs/`, `.env`, `.env.local`, `.env.*.local`, `venv/`, `.venv/`, `*.venv/`, `.idea/`, `.vscode/settings.json`, `*.swp`, `*.swo`, `*~`, `.DS_Store`, `Thumbs.db`, `coverage/`, `.coverage`, `htmlcov/`, `*.log`, `.mypy_cache/`, `.ruff_cache/`, `.pytest_cache/`, `docker-compose.override.yml`, `tmp/`, `temp/`, `config/secrets.yaml`, `config/.storage/`, `config/home-assistant_v2.db`
-    - _Requirements: 15.1, 15.2_
+- [-] 11. Developer environment and tooling
+  - [x] 11.1 Create `.gitignore` at repository root
+    - Exclude: `__pycache__/`, `*.pyc`, `*.pyo`, `*.egg-info/`, `dist/`, `build/`, `.eggs/`, `.env`, `.env.local`, `.env.*.local`, `venv/`, `.venv/`, `*.venv/`, `.idea/`, `.vscode/settings.json`, `*.swp`, `*.swo`, `*~`, `.DS_Store`, `Thumbs.db`, `coverage/`, `.coverage`, `htmlcov/`, `*.log`, `.mypy_cache/`, `.ruff_cache/`, `.pytest_cache/`, `tmp/`, `temp/`, `config/secrets.yaml`, `config/.storage/`, `config/home-assistant_v2.db`
+    - _Requirements: 12.1, 12.2_
 
-  - [ ] 12.2 Create `requirements-dev.txt` with development dependencies
+  - [ ] 11.2 Create `requirements-dev.txt` with development dependencies
     - Include pytest, hypothesis, ruff, mypy, coverage, and documentation tools
     - _Requirements: 17.3_
 
-  - [ ] 12.3 Create `.devcontainer/devcontainer.json` for VS Code Dev Containers
-    - Pre-install all dependencies
-    - _Requirements: 17.4_
+  - [ ] 11.3 Create `Makefile` with automation targets
+    - Targets: `setup`, `install`, `test`, `test-watch`, `lint`, `lint-fix`, `type-check`, `verify-setup`
+    - _Requirements: 14.4, 14.5, 15.4_
 
-  - [ ] 12.4 Create `Makefile` with automation targets
-    - Targets: `setup`, `install`, `test`, `test-watch`, `lint`, `lint-fix`, `type-check`, `dev`, `docker-build`, `verify-setup`
-    - _Requirements: 17.5, 17.6, 18.6_
-
-  - [ ] 12.5 Create `.vscode/launch.json` with debug configurations
+  - [ ] 11.4 Create `.vscode/launch.json` with debug configurations
     - Debug integration within Home Assistant, debug tests, attach to running processes
     - Source map and breakpoint support
     - _Requirements: 18.3, 18.4_
 
-- [ ] 13. Repository maintenance tools
-  - [ ] 13.1 Create `renovate.json` for automated dependency updates targeting `dev` branch
-    - _Requirements: 16.1_
+- [ ] 12. Repository maintenance tools
+  - [ ] 12.1 Create `renovate.json` for automated dependency updates targeting `dev` branch
+    - _Requirements: 13.1_
 
-  - [ ] 13.2 Create GitHub issue templates
+  - [ ] 12.2 Create GitHub issue templates
     - `.github/ISSUE_TEMPLATE/bug_report.md`
     - `.github/ISSUE_TEMPLATE/feature_request.md`
     - `.github/ISSUE_TEMPLATE/security_vulnerability.md`
-    - _Requirements: 16.3_
+    - _Requirements: 13.3_
 
-  - [ ] 13.3 Create `.github/PULL_REQUEST_TEMPLATE.md`
+  - [ ] 12.3 Create `.github/PULL_REQUEST_TEMPLATE.md`
     - Guide contributors to target `dev` branch, include description, testing steps, related issues
-    - _Requirements: 16.4_
+    - _Requirements: 13.4_
 
-- [ ] 14. Final checkpoint - Ensure all tests pass
+- [ ] 13. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

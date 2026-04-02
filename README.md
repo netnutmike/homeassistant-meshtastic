@@ -11,39 +11,23 @@ A Home Assistant custom integration for [Meshtastic](https://meshtastic.org/) me
 - **Encrypted Traffic Decoding** — AES-CTR decryption of encrypted Meshtastic channels using configurable channel keys.
 - **Send Messages via MQTT** — Send text messages, direct messages, and channel broadcasts through the MQTT broker.
 - **Full Entity Support** — Sensors, binary sensors, device trackers, and notify platform for each discovered node.
-- **Docker Distribution** — Pre-built Docker images on Docker Hub for easy deployment.
 
 ## Quick Start
 
-### Option 1: Docker (Recommended)
+### Option 1: HACS (Recommended)
 
-```bash
-# Clone the repository
-git clone https://github.com/your-username/homeassistant-meshtastic.git
-cd homeassistant-meshtastic
-
-# Start with Docker Compose
-docker compose up -d
-```
-
-Access Home Assistant at `http://localhost:8123`, then add the Meshtastic integration from Settings → Devices & Services.
+1. Install [HACS](https://hacs.xyz/) if you haven't already.
+2. In HACS, go to Integrations → three-dot menu → Custom repositories.
+3. Add this repository URL and select "Integration" as the category.
+4. Install the "Meshtastic" integration from HACS.
+5. Restart Home Assistant.
+6. Go to Settings → Devices & Services → Add Integration → Meshtastic.
 
 ### Option 2: Manual Installation
 
 1. Copy the `custom_components/meshtastic/` directory into your Home Assistant `config/custom_components/` directory.
 2. Restart Home Assistant.
 3. Go to Settings → Devices & Services → Add Integration → Meshtastic.
-
-### Option 3: Docker Hub
-
-```bash
-docker pull your-username/homeassistant-meshtastic:latest
-docker run -d \
-  --name homeassistant \
-  -p 8123:8123 \
-  -v ./config:/config \
-  your-username/homeassistant-meshtastic:latest
-```
 
 ## MQTT Setup
 
@@ -89,7 +73,6 @@ Request-response services require a direct device connection and are not availab
 ### Prerequisites
 
 - Python 3.12+
-- Docker and Docker Compose (for containerized development)
 
 ### Setup
 
@@ -116,25 +99,8 @@ make test          # Run test suite
 make lint          # Run linter (ruff)
 make lint-fix      # Auto-fix lint issues
 make type-check    # Run type checker (mypy)
-make dev           # Start dev environment with Docker Compose
-make docker-build  # Build Docker image locally
 make verify-setup  # Verify all prerequisites are installed
 ```
-
-### Docker Development
-
-```bash
-# Start development environment (hot-reload enabled)
-docker compose up -d
-
-# View logs
-docker compose logs -f
-
-# Stop
-docker compose down
-```
-
-The development docker-compose mounts `custom_components/` as a volume, so code changes are reflected without rebuilding.
 
 ### Running Tests
 
@@ -170,16 +136,12 @@ homeassistant-meshtastic/
 │   ├── sensor.py                     # Sensor entities
 │   ├── const.py                      # Constants
 │   └── ...
-├── config/                           # HA config directory (runtime)
 ├── tests/                            # Test suite
 ├── docs/                             # Documentation
 │   ├── api/                          # OpenAPI spec + Swagger UI
 │   ├── user-guide.md
 │   ├── developer-guide.md
 │   └── features.md
-├── Dockerfile                        # Multi-stage Docker build
-├── docker-compose.yaml               # Development deployment
-├── docker-compose.prod.yaml          # Production deployment
 ├── Makefile                          # Dev automation
 ├── requirements-dev.txt              # Dev dependencies
 ├── CONTRIBUTING.md                   # Contribution guidelines
@@ -209,4 +171,3 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 - [Meshtastic](https://meshtastic.org/) — The open-source mesh networking project
 - [Meshtastic HA Integration](https://github.com/meshtastic/home-assistant) — The upstream integration by [@broglep](https://github.com/broglep)
-- [Meshtastic MQTT Monitor](https://github.com/your-username/meshtastic-mqtt-monitor) — MQTT decoding reference implementation

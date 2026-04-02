@@ -4,7 +4,7 @@
 
 This design extends the existing Meshtastic Home Assistant custom integration to support MQTT as a fourth connection type alongside TCP, Bluetooth, and Serial. The MQTT connection enables users to monitor Meshtastic mesh network traffic by subscribing to an MQTT broker, decoding encrypted protobuf `ServiceEnvelope` messages, and automatically discovering nodes as Home Assistant devices with full sensor/entity support.
 
-Beyond the core MQTT integration, this design covers the repository infrastructure: OpenAPI/Swagger documentation, Docker containerization and publishing, developer environment tooling, CI/CD pipelines, branching strategy, and repository maintenance.
+Beyond the core MQTT integration, this design covers the repository infrastructure: OpenAPI/Swagger documentation, developer environment tooling, CI/CD pipelines, branching strategy, and repository maintenance. The integration is distributed via HACS and manual installation.
 
 ### Key Design Decisions
 
@@ -218,16 +218,11 @@ CONF_CONNECTION_MQTT_REGION = "mqtt_region"
 |-----------|---------|---------|
 | OpenAPI Spec | `docs/api/openapi.yaml` | Service endpoints, MQTT schemas, event payloads |
 | Swagger UI | `docs/api/index.html` | Interactive API documentation viewer |
-| Dockerfile | `Dockerfile` | Multi-stage build, HA + integration |
-| Docker Compose (dev) | `docker-compose.yaml` | Dev environment with volume mounts |
-| Docker Compose (prod) | `docker-compose.prod.yaml` | Production deployment |
 | CI Pipeline | `.github/workflows/ci.yml` | Tests, lint, type check, coverage |
-| Docker Publish | `.github/workflows/docker-publish.yml` | Build + push to Docker Hub |
 | Renovate | `renovate.json` | Automated dependency updates |
 | Issue Templates | `.github/ISSUE_TEMPLATE/` | Bug, feature, security templates |
 | PR Template | `.github/PULL_REQUEST_TEMPLATE.md` | Contribution guide |
 | Makefile | `Makefile` | Dev automation targets |
-| Devcontainer | `.devcontainer/devcontainer.json` | VS Code dev environment |
 | VS Code Config | `.vscode/launch.json` | Debug configurations |
 | Documentation | `docs/user-guide.md`, `docs/developer-guide.md`, `docs/features.md` | User and developer docs |
 
